@@ -1,83 +1,194 @@
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { Delta, Panel, Sparkline, StatTile } from "@/components/meridian/Primitives";
+import { useMarket } from "@/context/MarketContext";
+import {
+  bySymbol,
+  fmtCompact,
+  fmtPrice,
+  getAllQuotes,
+  Quote,
+} from "@/lib/market";
+import { cn } from "@/lib/utils";
+import { ArrowDown, ArrowUp, Bell, ChevronsUpDown } from "lucide-react";
+import { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
+
+type SortKey = "symbol" | "price" | "changePct" | "volume" | "marketCap";
+
+const COLUMNS: { key: SortKey; label: string; align?: "right" }[] = [
+  { key: "symbol", label: "Symbol" },
+  { key: "price", label: "Last", align: "right" },
+  { key: "changePct", label: "Chg %", align: "right" },
+  { key: "volume", label: "Volume", align: "right" },
+  { key: "marketCap", label: "Mkt Cap", align: "right" },
+];
 
 export default function Watchlist() {
-  const rows = [
-    { t: "AAPL", c: "Apple Inc.", p: "$175.84", ch: "+1.24%", a: "Active" },
-    { t: "MSFT", c: "Microsoft Corp.", p: "$420.10", ch: "-0.36%", a: "No Alerts" },
-    { t: "GOOGL", c: "Alphabet Inc. (Class A)", p: "$153.28", ch: "+0.49%", a: "Active" },
-    { t: "NVDA", c: "NVIDIA Corp.", p: "$950.30", ch: "+1.29%", a: "No Alerts" },
-    { t: "AMZN", c: "Amazon.com Inc.", p: "$180.55", ch: "-0.50%", a: "Active" },
-  ];
+  const quotes = useMemo(getAllQuotes, []);
+  const [sortKey, setSortKey] = useState<SortKey>("changePct");
+  const [asc, setAsc] = useState(false);
+  const navigate = useNavigate();
+  const { setActiveSymbol } = useMarket();
+
+  const sorted = useMemo(() => {
+    const val = (q: Quote): number | string =>
+      sortKey === "marketCap" ? bySymbol(q.symbol).marketCap : q[sortKey];
+    return [...quotes].sort((a, b) => {
+      const av = val(a);
+      const bv = val(b);
+      const cmp =
+        typeof av === "string"
+          ? av.localeCompare(bv as string)
+          : (av as number) - (bv as number);
+      return asc ? cmp : -cmp;
+    });
+  }, [quotes, sortKey, asc]);
+
+  const advancers = quotes.filter((q) => q.changePct > 0).length;
+  const best = [...quotes].sort((a, b) => b.changePct - a.changePct)[0];
+  const worst = [...quotes].sort((a, b) => a.changePct - b.changePct)[0];
+  const totalVol = quotes.reduce((a, q) => a + q.volume, 0);
+
+  const open = (s: string) => {
+    setActiveSymbol(s);
+    navigate("/terminal");
+  };
+
+  const onSort = (k: SortKey) => {
+    if (k === sortKey) setAsc((v) => !v);
+    else {
+      setSortKey(k);
+      setAsc(k === "symbol");
+    }
+  };
+
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-semibold">Watchlist and Alerts</h1>
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle className="text-xl">My Watchlist</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead className="text-muted-foreground">
-                  <tr className="border-b">
-                    <th className="py-3 text-left">Ticker</th>
-                    <th className="text-left">Company</th>
-                    <th className="text-left">Price</th>
-                    <th className="text-left">Change</th>
-                    <th className="text-left">Alerts</th>
-                    <th className="text-left">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {rows.map((r) => (
-                    <tr key={r.t} className="border-b last:border-0">
-                      <td className="py-3 font-medium">{r.t}</td>
-                      <td>{r.c}</td>
-                      <td>{r.p}</td>
-                      <td className={r.ch.startsWith("-") ? "text-red-600" : "text-emerald-600"}>{r.ch}</td>
-                      <td>{r.a}</td>
-                      <td className="text-muted-foreground">✎ 🗑</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Add Stock & Set Alert</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <div className="flex gap-2">
-              <Input placeholder="e.g., TSLA, BTC-USD" />
-              <Button>Add</Button>
-            </div>
-            <div className="grid grid-cols-1 gap-3">
-              <label className="text-sm">
-                <span className="text-muted-foreground">Select Stock</span>
-                <select className="mt-1 w-full h-10 rounded-md border bg-background px-3 text-sm">
-                  {rows.map((r) => (
-                    <option key={r.t}>{r.t}</option>
-                  ))}
-                </select>
-              </label>
-              <label className="text-sm">
-                <span className="text-muted-foreground">Alert Type</span>
-                <select className="mt-1 w-full h-10 rounded-md border bg-background px-3 text-sm">
-                  <option>Price crosses above</option>
-                  <option>Price crosses below</option>
-                  <option>Percent change</option>
-                </select>
-              </label>
-              <Button className="mt-2 w-full">Create Alert</Button>
-            </div>
-          </CardContent>
-        </Card>
+    <div className="space-y-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
+        <Panel bodyClassName="p-4">
+          <StatTile
+            label="Breadth"
+            value={
+              <span>
+                <span className="text-up">{advancers}▲</span>
+                <span className="text-muted-foreground mx-1.5">/</span>
+                <span className="text-down">{quotes.length - advancers}▼</span>
+              </span>
+            }
+            sub="advancers vs decliners"
+          />
+        </Panel>
+        <Panel bodyClassName="p-4">
+          <StatTile
+            label="Top Gainer"
+            value={
+              <span className="inline-flex items-center gap-2">
+                {best.symbol} <Delta value={best.changePct} bare />
+              </span>
+            }
+            sub={best.name}
+          />
+        </Panel>
+        <Panel bodyClassName="p-4">
+          <StatTile
+            label="Top Decliner"
+            value={
+              <span className="inline-flex items-center gap-2">
+                {worst.symbol} <Delta value={worst.changePct} bare />
+              </span>
+            }
+            sub={worst.name}
+          />
+        </Panel>
+        <Panel bodyClassName="p-4">
+          <StatTile
+            label="Aggregate Volume"
+            value={fmtCompact(totalVol)}
+            sub="across watchlist"
+          />
+        </Panel>
       </div>
+
+      <Panel
+        title="Primary Watchlist"
+        subtitle={`${quotes.length} instruments · click any row to chart`}
+        actions={
+          <button className="inline-flex items-center gap-1.5 h-7 px-2.5 rounded-lg border border-border/70 text-[11px] text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors">
+            <Bell className="h-3 w-3" /> Alerts
+          </button>
+        }
+        bodyClassName="px-0 pb-1"
+      >
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[760px] text-[13px]">
+            <thead>
+              <tr className="text-[10px] uppercase tracking-[0.12em] text-muted-foreground border-b border-border/60">
+                {COLUMNS.map((c) => (
+                  <th
+                    key={c.key}
+                    className={cn(
+                      "px-4 py-2.5 font-medium cursor-pointer select-none whitespace-nowrap",
+                      c.align === "right" ? "text-right" : "text-left",
+                    )}
+                    onClick={() => onSort(c.key)}
+                  >
+                    <span className="inline-flex items-center gap-1">
+                      {c.label}
+                      {sortKey === c.key ? (
+                        asc ? (
+                          <ArrowUp className="h-3 w-3 text-primary" />
+                        ) : (
+                          <ArrowDown className="h-3 w-3 text-primary" />
+                        )
+                      ) : (
+                        <ChevronsUpDown className="h-3 w-3 opacity-40" />
+                      )}
+                    </span>
+                  </th>
+                ))}
+                <th className="px-4 py-2.5 font-medium text-right text-[10px] uppercase tracking-[0.12em]">
+                  Trend · 1D
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {sorted.map((q) => {
+                const meta = bySymbol(q.symbol);
+                return (
+                  <tr
+                    key={q.symbol}
+                    onClick={() => open(q.symbol)}
+                    className="border-b border-border/40 last:border-0 hover:bg-accent/40 cursor-pointer transition-colors"
+                  >
+                    <td className="px-4 py-2.5">
+                      <div className="font-mono-data font-semibold">{q.symbol}</div>
+                      <div className="text-[11px] text-muted-foreground truncate max-w-[180px]">
+                        {q.name}
+                      </div>
+                    </td>
+                    <td className="px-4 py-2.5 text-right font-mono-data">
+                      {fmtPrice(q.price)}
+                    </td>
+                    <td className="px-4 py-2.5 text-right">
+                      <Delta value={q.changePct} />
+                    </td>
+                    <td className="px-4 py-2.5 text-right font-mono-data text-muted-foreground">
+                      {fmtCompact(q.volume)}
+                    </td>
+                    <td className="px-4 py-2.5 text-right font-mono-data text-muted-foreground">
+                      ${fmtCompact(meta.marketCap)}
+                    </td>
+                    <td className="px-4 py-2.5">
+                      <div className="flex justify-end">
+                        <Sparkline data={q.spark} width={110} height={26} />
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </Panel>
     </div>
   );
 }

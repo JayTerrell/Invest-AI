@@ -1,5 +1,5 @@
 /** @import must precede all other statements */
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap");
 
 @tailwind base;
 @tailwind components;
@@ -7,103 +7,198 @@
 
 @layer base {
   /**
-   * Tailwind CSS theme
-   * tailwind.config.ts expects the following color variables to be expressed as HSL values.
-   * A different format will require also updating the theme in tailwind.config.ts.
-  */
+   * Meridian — institutional dark theme.
+   * All color variables are HSL triplets consumed as hsl(var(--token)).
+   */
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --background: 228 36% 5%;
+    --foreground: 220 25% 92%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card: 227 32% 7%;
+    --card-foreground: 220 25% 92%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover: 227 34% 8%;
+    --popover-foreground: 220 25% 92%;
 
-    --primary: 160 72% 36%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 187 85% 53%;
+    --primary-foreground: 228 36% 6%;
 
-    --secondary: 210 30% 97%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 226 26% 13%;
+    --secondary-foreground: 220 20% 85%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 226 24% 12%;
+    --muted-foreground: 222 14% 58%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 226 28% 15%;
+    --accent-foreground: 220 25% 92%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 347 89% 61%;
+    --destructive-foreground: 220 25% 96%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 160 72% 36%;
+    --border: 226 24% 14%;
+    --input: 226 24% 16%;
+    --ring: 187 85% 53%;
 
-    --radius: 0.5rem;
+    --radius: 0.625rem;
 
-    --sidebar-background: 0 0% 98%;
+    /* Market semantics — reserved status colors, never reused for series */
+    --up: 160 84% 39%;
+    --down: 347 77% 55%;
+    --flat: 222 14% 58%;
 
-    --sidebar-foreground: 240 5.3% 26.1%;
+    /* Validated categorical chart palette (dark surface #0B0F1A) */
+    --chart-1: 201 98% 39%; /* #0284C7 */
+    --chart-2: 32 95% 44%; /* #D97706 */
+    --chart-3: 161 94% 30%; /* #059669 */
+    --chart-4: 258 90% 66%; /* #8B5CF6 */
+    --chart-5: 350 89% 60%; /* #F43F5E */
 
-    --sidebar-primary: 160 72% 36%;
+    /* Elevation surfaces */
+    --surface-1: 227 32% 7%;
+    --surface-2: 226 30% 9%;
+    --surface-3: 226 28% 12%;
 
-    --sidebar-primary-foreground: 0 0% 100%;
-
-    --sidebar-accent: 160 30% 94%;
-
-    --sidebar-accent-foreground: 160 72% 20%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 160 72% 36%;
+    --sidebar-background: 228 36% 4%;
+    --sidebar-foreground: 220 20% 80%;
+    --sidebar-primary: 187 85% 53%;
+    --sidebar-primary-foreground: 228 36% 6%;
+    --sidebar-accent: 226 28% 12%;
+    --sidebar-accent-foreground: 220 25% 92%;
+    --sidebar-border: 226 24% 12%;
+    --sidebar-ring: 187 85% 53%;
   }
 
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 160 80% 45%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
-  }
-}
-
-@layer base {
   * {
     @apply border-border;
   }
 
+  html {
+    scroll-behavior: smooth;
+  }
+
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings:
+      "cv02" 1,
+      "cv03" 1,
+      "cv11" 1;
+  }
+
+  ::selection {
+    background: hsl(var(--primary) / 0.25);
+  }
+
+  /* Slim institutional scrollbars */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: hsl(226 20% 22%);
+    border-radius: 8px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(226 20% 30%);
+  }
+}
+
+@layer utilities {
+  .font-display {
+    font-family: "Space Grotesk", "Inter", sans-serif;
+  }
+  .font-mono-data {
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-variant-numeric: tabular-nums;
+  }
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+
+  .text-up {
+    color: hsl(var(--up));
+  }
+  .text-down {
+    color: hsl(var(--down));
+  }
+
+  /* Glass panel — the core Meridian surface */
+  .glass {
+    background: linear-gradient(
+      180deg,
+      hsl(var(--surface-2) / 0.72),
+      hsl(var(--surface-1) / 0.6)
+    );
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid hsl(226 30% 26% / 0.35);
+    box-shadow:
+      0 1px 0 hsl(226 40% 60% / 0.06) inset,
+      0 20px 50px -24px hsl(228 60% 2% / 0.9);
+  }
+
+  .glass-bright {
+    background: linear-gradient(
+      180deg,
+      hsl(226 30% 14% / 0.8),
+      hsl(226 30% 9% / 0.7)
+    );
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border: 1px solid hsl(226 40% 40% / 0.35);
+  }
+
+  .text-gradient {
+    background: linear-gradient(
+      100deg,
+      hsl(220 30% 96%),
+      hsl(187 85% 70%) 55%,
+      hsl(220 30% 88%)
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .glow-primary {
+    box-shadow:
+      0 0 0 1px hsl(var(--primary) / 0.35),
+      0 0 24px -4px hsl(var(--primary) / 0.45);
+  }
+
+  /* Subtle blueprint grid backdrop */
+  .bg-grid {
+    background-image:
+      linear-gradient(hsl(224 40% 40% / 0.07) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(224 40% 40% / 0.07) 1px, transparent 1px);
+    background-size: 44px 44px;
+  }
+
+  .mask-fade-y {
+    mask-image: linear-gradient(
+      180deg,
+      transparent,
+      black 12%,
+      black 88%,
+      transparent
+    );
+  }
+  .mask-fade-x {
+    mask-image: linear-gradient(
+      90deg,
+      transparent,
+      black 6%,
+      black 94%,
+      transparent
+    );
+  }
+
+  .perspective-1200 {
+    perspective: 1200px;
+  }
+  .preserve-3d {
+    transform-style: preserve-3d;
   }
 }

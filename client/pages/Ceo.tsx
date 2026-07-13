@@ -1,93 +1,118 @@
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
+import { Panel } from "@/components/meridian/Primitives";
+import { useMarket } from "@/context/MarketContext";
+import { EXECUTIVES, ExecProfile, fmtCompact } from "@/lib/market";
+import { cn } from "@/lib/utils";
+import { useNavigate } from "react-router-dom";
 
 export default function Ceo() {
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-semibold">CEO Performance Analysis</h1>
-      <Card>
-        <CardContent className="pt-6 flex flex-col items-center text-center gap-3">
-          <Avatar className="h-20 w-20"><AvatarImage src="https://i.pravatar.cc/160?img=1" /><AvatarFallback>ER</AvatarFallback></Avatar>
-          <div>
-            <div className="text-xl font-semibold">Dr. Evelyn Reed</div>
-            <div className="text-muted-foreground">Chief Executive Officer at StockPulse AI</div>
-          </div>
-          <Badge className="bg-emerald-600 hover:bg-emerald-600">Overall Rating Exceptional</Badge>
-          <p className="max-w-3xl text-sm text-muted-foreground">Dr. Evelyn Reed is a visionary leader with a proven track record of driving innovation and company growth, leveraging advanced analytics and AI to disrupt traditional markets.</p>
-        </CardContent>
-      </Card>
+    <div className="space-y-4">
+      <Panel
+        title="Executive Scorecards"
+        subtitle="Leadership quality scored on capital allocation, execution and shareholder alignment"
+        bodyClassName="px-4 pb-4"
+      >
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+          {EXECUTIVES.map((e) => (
+            <ExecCard key={e.symbol} exec={e} />
+          ))}
+        </div>
+      </Panel>
+    </div>
+  );
+}
 
-      <div className="grid md:grid-cols-3 gap-6">
-        {[
-          ["Average Company Growth", "+22.5%"],
-          ["Innovation Index", "9.2/10"],
-          ["Strategic Vision Score", "8.9/10"],
-        ].map(([k,v]) => (
-          <Card key={k as string}>
-            <CardContent className="p-6"><div className="text-muted-foreground text-sm">{k as string}</div><div className="text-2xl font-semibold">{v as string}</div></CardContent>
-          </Card>
-        ))}
+function ExecCard({ exec }: { exec: ExecProfile }) {
+  const navigate = useNavigate();
+  const { setActiveSymbol } = useMarket();
+  const composite = Math.round(
+    (exec.capitalScore + exec.executionScore + exec.alignmentScore) / 3,
+  );
+
+  return (
+    <article className="rounded-xl border border-border/60 bg-surface-2/50 p-5 hover:border-primary/30 transition-colors">
+      <header className="flex items-start gap-3">
+        <div className="h-11 w-11 rounded-xl bg-gradient-to-br from-primary/30 to-chart-4/40 flex items-center justify-center font-display font-bold text-sm">
+          {exec.name
+            .split(" ")
+            .map((w) => w[0])
+            .slice(0, 2)
+            .join("")}
+        </div>
+        <div className="min-w-0 flex-1">
+          <h3 className="font-display font-semibold leading-tight">{exec.name}</h3>
+          <p className="text-[11px] text-muted-foreground">{exec.title}</p>
+        </div>
+        <button
+          onClick={() => {
+            setActiveSymbol(exec.symbol);
+            navigate("/terminal");
+          }}
+          className="text-[11px] font-mono-data px-2 py-1 rounded-lg border border-primary/25 bg-primary/5 text-primary hover:bg-primary/15 transition-colors"
+        >
+          {exec.symbol}
+        </button>
+      </header>
+
+      <div className="mt-4 flex items-center gap-4">
+        <div
+          className={cn(
+            "font-display text-3xl font-bold",
+            composite >= 90 ? "text-up" : composite >= 75 ? "text-primary" : "text-chart-2",
+          )}
+        >
+          {composite}
+        </div>
+        <div className="text-[11px] text-muted-foreground leading-tight">
+          composite
+          <br />
+          leadership score
+        </div>
+        <div className="ml-auto text-right">
+          <div className="font-mono-data text-sm font-semibold text-up">
+            +{fmtCompact(exec.totalReturnPct)}%
+          </div>
+          <div className="text-[10px] text-muted-foreground">
+            return over {exec.tenureYears}y tenure
+          </div>
+        </div>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Leadership Track Record</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto">
-            <table className="min-w-[700px] w-full text-sm">
-              <thead className="text-muted-foreground">
-                <tr className="border-b">
-                  <th className="text-left py-2">Company</th>
-                  <th className="text-left">Role</th>
-                  <th className="text-left">Years</th>
-                  <th className="text-left">Key Achievements</th>
-                </tr>
-              </thead>
-              <tbody>
-                {[
-                  ['Tech Innovations Inc.', 'CEO', '2022 -', 'Average revenue growth during tenure; grew market cap; launched successful product lines.'],
-                  ['Global Ventures Group', 'COO', '2010 - 2015', 'Streamlined operations; reduced costs by 15%; expanded into new markets.'],
-                  ['Fintech Solutions Ltd.', 'Head of Product', '2005 - 2010', 'Developed award-winning fintech platform; increased user engagement by 50%.'],
-                  ['Startup X', 'VP Engineering', '2000 - 2005', 'Built initial engineering team and infrastructure from scratch.'],
-                ].map((r,i)=> (
-                  <tr key={i} className="border-b last:border-0">
-                    <td className="py-2 font-medium">{r[0]}</td>
-                    <td>{r[1]}</td>
-                    <td>{r[2]}</td>
-                    <td>{r[3]}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </CardContent>
-      </Card>
+      <div className="mt-4 space-y-2">
+        <ScoreBar label="Capital allocation" value={exec.capitalScore} />
+        <ScoreBar label="Execution" value={exec.executionScore} />
+        <ScoreBar label="Alignment" value={exec.alignmentScore} sub={`${exec.insiderOwnPct}% insider ownership`} />
+      </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Leadership Impact Assessment</CardTitle>
-        </CardHeader>
-        <CardContent className="text-sm text-muted-foreground space-y-3">
-          <p>Dr. Reed is renowned for her transformative leadership, with strong emphasis on data-driven decision-making and empowering cross-functional teams. She champions continuous learning and strategic foresight, enabling organizations to anticipate market shifts and capitalize on emerging opportunities.</p>
-          <p>Her ability to articulate a compelling vision and rally diverse stakeholders has been instrumental in her success.</p>
-        </CardContent>
-      </Card>
+      <p className="mt-4 text-[12px] text-muted-foreground leading-relaxed">
+        {exec.note}
+      </p>
+    </article>
+  );
+}
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Executive Peer Comparison</CardTitle>
-        </CardHeader>
-        <CardContent className="grid sm:grid-cols-3 gap-4">
-          {["Emily Chen","David Lee","Sarah Miller"].map((n, i)=> (
-            <div key={i} className="flex items-center gap-3 border rounded-md p-3">
-              <img className="h-10 w-10 rounded-full" src={`https://i.pravatar.cc/100?img=${i+2}`} alt="" />
-              <div className="text-sm"><div className="font-medium">{n}</div><div className="text-muted-foreground">Quantum Analytics</div></div>
-            </div>
-          ))}
-        </CardContent>
-      </Card>
+function ScoreBar({
+  label,
+  value,
+  sub,
+}: {
+  label: string;
+  value: number;
+  sub?: string;
+}) {
+  return (
+    <div>
+      <div className="flex items-center justify-between text-[11px] mb-1">
+        <span className="text-muted-foreground">{label}</span>
+        <span className="font-mono-data">{value}</span>
+      </div>
+      <div className="h-1.5 rounded-full bg-surface-3 overflow-hidden">
+        <div
+          className="h-full rounded-full bg-gradient-to-r from-primary/50 to-primary"
+          style={{ width: `${value}%` }}
+        />
+      </div>
+      {sub && <div className="text-[10px] text-muted-foreground mt-0.5">{sub}</div>}
     </div>
   );
 }
