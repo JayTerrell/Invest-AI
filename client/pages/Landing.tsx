@@ -26,14 +26,15 @@ import {
   Radar,
   Zap,
 } from "lucide-react";
-import { lazy, Suspense, useMemo, useRef } from "react";
+import { useMemo, useRef } from "react";
 import { Link } from "react-router-dom";
+import { ScrollVideo } from "@/components/landing/ScrollVideo";
 
-const MarketScene = lazy(() =>
-  import("@/components/landing/MarketScene").then((m) => ({
-    default: m.MarketScene,
-  })),
-);
+// Self-hosted copy wins when present (drop the file in /public); the CDN copy
+// (Higgsfield generation, owned by this account) covers deploys until then.
+const LOCAL_VIDEO = "/landing-bg.mp4";
+const CDN_VIDEO =
+  "https://d8j0ntlcm91z4.cloudfront.net/user_3G6z0bPOaII31htnciAMzy7iYOx/hf_20260713_191213_5352c7ba-2f1c-45d3-947a-2b6cbd7d24ec.mp4";
 
 export default function Landing() {
   const pageRef = useRef<HTMLDivElement>(null);
@@ -43,17 +44,34 @@ export default function Landing() {
     stiffness: 55,
     damping: 20,
   });
+  // gentle push-in + drift as the playhead scrubs forward
+  const videoScale = useTransform(scrollYProgress, [0, 1], [1.06, 1.18]);
+  const videoY = useTransform(scrollYProgress, [0, 1], ["0%", "-4%"]);
 
   return (
     <div ref={pageRef} className="relative bg-background text-foreground">
-      {/* 3D scene pinned behind everything */}
-      <div className="fixed inset-0 z-0">
-        {!reducedMotion && (
-          <Suspense fallback={null}>
-            <MarketScene scroll={sceneScroll} />
-          </Suspense>
-        )}
+      {/* scroll-scrubbed cinematic video pinned behind everything */}
+      <div className="fixed inset-0 z-0 overflow-hidden">
+        {/* ambient fallback while the video loads (or if no source resolves) */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              "radial-gradient(90% 70% at 50% 80%, hsl(187 60% 18% / 0.5), transparent 60%), radial-gradient(70% 55% at 70% 20%, hsl(258 45% 20% / 0.4), transparent 65%), hsl(228 36% 5%)",
+          }}
+        />
+        <motion.div
+          style={reducedMotion ? undefined : { scale: videoScale, y: videoY }}
+          className="absolute inset-0"
+        >
+          <ScrollVideo
+            scroll={sceneScroll}
+            sources={[LOCAL_VIDEO, CDN_VIDEO]}
+            active={!reducedMotion}
+          />
+        </motion.div>
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,hsl(228_36%_5%/0.55)_70%,hsl(228_36%_5%)_100%)]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-transparent to-background/80" />
       </div>
 
       <TopNav />
