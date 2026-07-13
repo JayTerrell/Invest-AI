@@ -40,13 +40,11 @@ export default function Landing() {
   const pageRef = useRef<HTMLDivElement>(null);
   const reducedMotion = useReducedMotion();
   const { scrollYProgress } = useScroll();
-  const sceneScroll = useSpring(scrollYProgress, {
-    stiffness: 55,
-    damping: 20,
-  });
-  // gentle push-in + drift as the playhead scrubs forward
-  const videoScale = useTransform(scrollYProgress, [0, 1], [1.06, 1.18]);
-  const videoY = useTransform(scrollYProgress, [0, 1], ["0%", "-4%"]);
+  // The video playhead reads RAW scroll progress (monotonic) so it never
+  // jitters. The parallax push-in is decorative, so it can ride a soft spring.
+  const parallax = useSpring(scrollYProgress, { stiffness: 60, damping: 22 });
+  const videoScale = useTransform(parallax, [0, 1], [1.06, 1.18]);
+  const videoY = useTransform(parallax, [0, 1], ["0%", "-4%"]);
 
   return (
     <div ref={pageRef} className="relative bg-background text-foreground">
@@ -65,7 +63,7 @@ export default function Landing() {
           className="absolute inset-0"
         >
           <ScrollVideo
-            scroll={sceneScroll}
+            scroll={scrollYProgress}
             sources={[LOCAL_VIDEO, CDN_VIDEO]}
             active={!reducedMotion}
           />
