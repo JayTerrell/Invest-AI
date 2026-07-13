@@ -5,7 +5,7 @@ import { createRoot } from "react-dom/client";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, HashRouter, Routes, Route } from "react-router-dom";
 import { MarketProvider } from "@/context/MarketContext";
 import TerminalLayout from "./components/layout/TerminalLayout";
 import Landing from "./pages/Landing";
@@ -19,6 +19,10 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
+// Hash routing for static single-file hosting (previews); browser routing otherwise.
+const Router =
+  import.meta.env.VITE_HASH_ROUTER === "1" ? HashRouter : BrowserRouter;
+
 const wrap = (el: React.ReactNode) => <TerminalLayout>{el}</TerminalLayout>;
 
 const App = () => (
@@ -26,7 +30,7 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <BrowserRouter>
+      <Router>
         <MarketProvider>
           <Routes>
             <Route path="/" element={<Landing />} />
@@ -40,7 +44,7 @@ const App = () => (
             <Route path="*" element={<NotFound />} />
           </Routes>
         </MarketProvider>
-      </BrowserRouter>
+      </Router>
     </TooltipProvider>
   </QueryClientProvider>
 );

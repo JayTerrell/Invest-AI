@@ -15,6 +15,10 @@ export default defineConfig(({ mode }) => ({
   },
   build: {
     outDir: "dist/spa",
+    // SINGLE_FILE=1 emits one JS bundle (no split chunks) for static single-file previews
+    ...(process.env.SINGLE_FILE === "1" && {
+      rollupOptions: { output: { inlineDynamicImports: true } },
+    }),
   },
   plugins: [react(), expressPlugin()],
   resolve: {
