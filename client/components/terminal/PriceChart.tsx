@@ -43,14 +43,14 @@ const C = {
   down: "#f43f5e",
   upSoft: "rgba(16,185,129,0.45)",
   downSoft: "rgba(244,63,94,0.45)",
-  grid: "rgba(120,140,190,0.07)",
-  text: "#8b93a7",
-  crosshair: "rgba(34,211,238,0.5)",
-  accent: "#22d3ee",
-  ema20: "#d97706",
-  ema50: "#8b5cf6",
-  bb: "rgba(2,132,199,0.85)",
-  bbFill: "rgba(2,132,199,0.35)",
+  grid: "rgba(150,160,180,0.06)",
+  text: "#8f949e",
+  crosshair: "rgba(221,227,236,0.55)",
+  accent: "#e2e7ef", // price / area / RSI / MACD — polished silver-white
+  ema20: "#c8a15a", // champagne gold
+  ema50: "#aab3c2", // platinum
+  bb: "rgba(176,184,198,0.7)",
+  bbFill: "rgba(176,184,198,0.3)",
 };
 
 interface Legend {
@@ -94,8 +94,8 @@ export function PriceChart({
         fontSize: 11,
         attributionLogo: false,
         panes: {
-          separatorColor: "rgba(120,140,190,0.15)",
-          separatorHoverColor: "rgba(34,211,238,0.25)",
+          separatorColor: "rgba(150,158,175,0.14)",
+          separatorHoverColor: "rgba(210,220,235,0.22)",
           enableResize: true,
         },
       },
@@ -105,15 +105,15 @@ export function PriceChart({
       },
       crosshair: {
         mode: CrosshairMode.Normal,
-        vertLine: { color: C.crosshair, width: 1, style: LineStyle.LargeDashed, labelBackgroundColor: "#16324a" },
-        horzLine: { color: C.crosshair, width: 1, style: LineStyle.LargeDashed, labelBackgroundColor: "#16324a" },
+        vertLine: { color: C.crosshair, width: 1, style: LineStyle.LargeDashed, labelBackgroundColor: "#2b2f37" },
+        horzLine: { color: C.crosshair, width: 1, style: LineStyle.LargeDashed, labelBackgroundColor: "#2b2f37" },
       },
       rightPriceScale: {
-        borderColor: "rgba(120,140,190,0.15)",
+        borderColor: "rgba(150,158,175,0.14)",
         scaleMargins: { top: 0.08, bottom: overlays.volume ? 0.22 : 0.08 },
       },
       timeScale: {
-        borderColor: "rgba(120,140,190,0.15)",
+        borderColor: "rgba(150,158,175,0.14)",
         timeVisible: TIMEFRAMES[timeframe].stepSec < 86400,
         secondsVisible: false,
         rightOffset: 4,
@@ -146,8 +146,8 @@ export function PriceChart({
     } else {
       priceSeries = chart.addSeries(AreaSeries, {
         lineColor: C.accent,
-        topColor: "rgba(34,211,238,0.25)",
-        bottomColor: "rgba(34,211,238,0)",
+        topColor: "rgba(214,222,233,0.22)",
+        bottomColor: "rgba(214,222,233,0)",
         lineWidth: 2,
         priceLineColor: C.accent,
         priceLineStyle: LineStyle.Dotted,

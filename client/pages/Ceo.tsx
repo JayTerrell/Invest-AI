@@ -32,7 +32,7 @@ function ExecCard({ exec }: { exec: ExecProfile }) {
   return (
     <article className="rounded-xl border border-border/60 bg-surface-2/50 p-5 hover:border-primary/30 transition-colors">
       <header className="flex items-start gap-3">
-        <div className="h-11 w-11 rounded-xl bg-gradient-to-br from-primary/30 to-chart-4/40 flex items-center justify-center font-display font-bold text-sm">
+        <div className="h-11 w-11 rounded-xl bg-metal text-primary-foreground flex items-center justify-center font-display font-bold text-sm">
           {exec.name
             .split(" ")
             .map((w) => w[0])

@@ -90,7 +90,7 @@ function Rail() {
       <Link
         to="/"
         aria-label="Meridian home"
-        className="mb-3 inline-flex h-9 w-9 items-center justify-center rounded-xl bg-primary/12 text-primary glow-primary"
+        className="mb-3 inline-flex h-9 w-9 items-center justify-center rounded-xl bg-metal text-primary-foreground glow-brand"
       >
         <Hexagon className="h-5 w-5" strokeWidth={2.2} />
       </Link>
@@ -124,7 +124,7 @@ function Rail() {
         >
           <Settings className="h-[18px] w-[18px]" />
         </button>
-        <div className="h-8 w-8 rounded-full bg-gradient-to-br from-primary/70 to-chart-4 mt-1 ring-1 ring-border" />
+        <div className="h-8 w-8 rounded-full bg-metal mt-1 ring-1 ring-border" />
       </div>
     </aside>
   );
@@ -141,7 +141,7 @@ function TopBar({ title }: { title: string }) {
       <Link
         to="/"
         aria-label="Meridian home"
-        className="md:hidden inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/12 text-primary"
+        className="md:hidden inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-metal text-primary-foreground"
       >
         <Hexagon className="h-[18px] w-[18px]" strokeWidth={2.2} />
       </Link>

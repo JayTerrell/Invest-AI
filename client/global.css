@@ -11,61 +11,68 @@
    * All color variables are HSL triplets consumed as hsl(var(--token)).
    */
   :root {
-    --background: 228 36% 5%;
-    --foreground: 220 25% 92%;
+    /* Graphite-black ground: neutral, barely-cool, so silver reads as silver */
+    --background: 220 14% 5%;
+    --foreground: 220 14% 93%;
 
-    --card: 227 32% 7%;
-    --card-foreground: 220 25% 92%;
+    --card: 220 12% 7%;
+    --card-foreground: 220 14% 93%;
 
-    --popover: 227 34% 8%;
-    --popover-foreground: 220 25% 92%;
+    --popover: 220 12% 8%;
+    --popover-foreground: 220 14% 93%;
 
-    --primary: 187 85% 53%;
-    --primary-foreground: 228 36% 6%;
+    /* Accent = polished silver/platinum (the brand's "chrome") */
+    --primary: 214 16% 82%;
+    --primary-foreground: 220 20% 7%;
 
-    --secondary: 226 26% 13%;
-    --secondary-foreground: 220 20% 85%;
+    --secondary: 220 10% 13%;
+    --secondary-foreground: 220 12% 86%;
 
-    --muted: 226 24% 12%;
-    --muted-foreground: 222 14% 58%;
+    --muted: 220 9% 12%;
+    --muted-foreground: 220 8% 60%;
 
-    --accent: 226 28% 15%;
-    --accent-foreground: 220 25% 92%;
+    --accent: 220 10% 16%;
+    --accent-foreground: 220 14% 93%;
 
     --destructive: 347 89% 61%;
-    --destructive-foreground: 220 25% 96%;
+    --destructive-foreground: 220 20% 96%;
 
-    --border: 226 24% 14%;
-    --input: 226 24% 16%;
-    --ring: 187 85% 53%;
+    --border: 220 9% 15%;
+    --input: 220 9% 17%;
+    --ring: 214 20% 72%;
 
     --radius: 0.625rem;
 
     /* Market semantics — reserved status colors, never reused for series */
     --up: 160 84% 39%;
     --down: 347 77% 55%;
-    --flat: 222 14% 58%;
+    --flat: 220 8% 60%;
 
-    /* Validated categorical chart palette (dark surface #0B0F1A) */
-    --chart-1: 201 98% 39%; /* #0284C7 */
-    --chart-2: 32 95% 44%; /* #D97706 */
-    --chart-3: 161 94% 30%; /* #059669 */
+    /* Silver metal ramp (accents, sheens, borders) */
+    --metal-light: 210 24% 92%;
+    --metal: 214 14% 74%;
+    --metal-dark: 220 12% 46%;
+
+    /* Validated categorical chart palette — blue-free (dark surface #0B0E14) */
+    --chart-1: 41 53% 45%; /* #AE8836 bronze */
+    --chart-2: 259 51% 63%; /* #8E6FD0 violet */
+    --chart-3: 147 43% 42%; /* #3E9A68 green  */
     --chart-4: 258 90% 66%; /* #8B5CF6 */
     --chart-5: 350 89% 60%; /* #F43F5E */
 
     /* Elevation surfaces */
-    --surface-1: 227 32% 7%;
-    --surface-2: 226 30% 9%;
-    --surface-3: 226 28% 12%;
+    --surface-1: 220 12% 7%;
+    --surface-2: 220 11% 9%;
+    --surface-3: 220 10% 13%;
 
-    --sidebar-background: 228 36% 4%;
-    --sidebar-foreground: 220 20% 80%;
-    --sidebar-primary: 187 85% 53%;
-    --sidebar-primary-foreground: 228 36% 6%;
-    --sidebar-accent: 226 28% 12%;
-    --sidebar-accent-foreground: 220 25% 92%;
-    --sidebar-border: 226 24% 12%;
-    --sidebar-ring: 187 85% 53%;
+    --sidebar-background: 220 15% 4%;
+    --sidebar-foreground: 220 12% 80%;
+    --sidebar-primary: 214 16% 82%;
+    --sidebar-primary-foreground: 220 20% 7%;
+    --sidebar-accent: 220 10% 12%;
+    --sidebar-accent-foreground: 220 14% 93%;
+    --sidebar-border: 220 9% 12%;
+    --sidebar-ring: 214 20% 72%;
   }
 
   * {
@@ -97,11 +104,11 @@
     background: transparent;
   }
   ::-webkit-scrollbar-thumb {
-    background: hsl(226 20% 22%);
+    background: hsl(220 8% 22%);
     border-radius: 8px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: hsl(226 20% 30%);
+    background: hsl(220 8% 32%);
   }
 }
 
@@ -133,46 +140,69 @@
     );
     backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);
-    border: 1px solid hsl(226 30% 26% / 0.35);
+    border: 1px solid hsl(220 12% 40% / 0.28);
     box-shadow:
-      0 1px 0 hsl(226 40% 60% / 0.06) inset,
-      0 20px 50px -24px hsl(228 60% 2% / 0.9);
+      0 1px 0 hsl(210 30% 70% / 0.07) inset,
+      0 20px 50px -24px hsl(220 40% 1% / 0.9);
   }
 
   .glass-bright {
     background: linear-gradient(
       180deg,
-      hsl(226 30% 14% / 0.8),
-      hsl(226 30% 9% / 0.7)
+      hsl(220 12% 15% / 0.82),
+      hsl(220 12% 9% / 0.7)
     );
     backdrop-filter: blur(18px);
     -webkit-backdrop-filter: blur(18px);
-    border: 1px solid hsl(226 40% 40% / 0.35);
+    border: 1px solid hsl(214 16% 55% / 0.3);
   }
 
+  /* Polished-chrome headline text */
   .text-gradient {
     background: linear-gradient(
-      100deg,
-      hsl(220 30% 96%),
-      hsl(187 85% 70%) 55%,
-      hsl(220 30% 88%)
+      176deg,
+      hsl(210 30% 99%) 0%,
+      hsl(214 16% 84%) 44%,
+      hsl(215 12% 66%) 56%,
+      hsl(210 24% 90%) 100%
     );
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
   }
 
+  /* Brushed-metal surface for primary CTAs and the brand mark */
+  .bg-metal {
+    background-image: linear-gradient(
+      160deg,
+      hsl(210 28% 95%) 0%,
+      hsl(214 16% 80%) 34%,
+      hsl(216 12% 66%) 52%,
+      hsl(213 16% 82%) 70%,
+      hsl(210 26% 94%) 100%
+    );
+    color: hsl(var(--primary-foreground));
+  }
+
+  /* Soft metallic halo (replaces the old neon glow) */
   .glow-primary {
     box-shadow:
-      0 0 0 1px hsl(var(--primary) / 0.35),
-      0 0 24px -4px hsl(var(--primary) / 0.45);
+      0 0 0 1px hsl(214 18% 70% / 0.35),
+      0 0 22px -6px hsl(210 24% 82% / 0.4);
+  }
+
+  .glow-brand {
+    box-shadow:
+      0 1px 0 hsl(210 40% 96% / 0.5) inset,
+      0 8px 26px -10px hsl(210 20% 80% / 0.45),
+      0 0 0 1px hsl(214 16% 62% / 0.4);
   }
 
   /* Subtle blueprint grid backdrop */
   .bg-grid {
     background-image:
-      linear-gradient(hsl(224 40% 40% / 0.07) 1px, transparent 1px),
-      linear-gradient(90deg, hsl(224 40% 40% / 0.07) 1px, transparent 1px);
+      linear-gradient(hsl(220 10% 50% / 0.06) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(220 10% 50% / 0.06) 1px, transparent 1px);
     background-size: 44px 44px;
   }
 

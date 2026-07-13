@@ -55,7 +55,7 @@ export default function Landing() {
           className="absolute inset-0"
           style={{
             background:
-              "radial-gradient(90% 70% at 50% 80%, hsl(187 60% 18% / 0.5), transparent 60%), radial-gradient(70% 55% at 70% 20%, hsl(258 45% 20% / 0.4), transparent 65%), hsl(228 36% 5%)",
+              "radial-gradient(90% 70% at 50% 80%, hsl(210 18% 20% / 0.55), transparent 60%), radial-gradient(70% 55% at 70% 20%, hsl(214 12% 26% / 0.4), transparent 65%), hsl(220 14% 5%)",
           }}
         />
         <motion.div
@@ -94,7 +94,7 @@ function TopNav() {
       <div className="mx-auto max-w-6xl px-4 sm:px-6 mt-4">
         <div className="glass-bright rounded-2xl h-14 px-4 sm:px-5 flex items-center gap-4">
           <Link to="/" className="flex items-center gap-2.5">
-            <span className="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-primary/15 text-primary glow-primary">
+            <span className="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-metal text-primary-foreground glow-brand">
               <Hexagon className="h-[18px] w-[18px]" strokeWidth={2.2} />
             </span>
             <span className="font-display font-bold tracking-wide text-[15px]">
@@ -112,7 +112,7 @@ function TopNav() {
             </span>
             <Link
               to="/terminal"
-              className="inline-flex items-center gap-1.5 h-9 px-4 rounded-xl bg-primary text-primary-foreground text-[13px] font-semibold hover:brightness-110 transition-all glow-primary"
+              className="inline-flex items-center gap-1.5 h-9 px-4 rounded-xl bg-metal text-primary-foreground text-[13px] font-semibold hover:brightness-110 transition-all glow-brand"
             >
               Launch Terminal
               <ArrowRight className="h-3.5 w-3.5" />
@@ -153,7 +153,7 @@ function Hero() {
         <div className="mt-9 flex flex-col sm:flex-row items-center justify-center gap-3">
           <Link
             to="/terminal"
-            className="inline-flex items-center gap-2 h-12 px-7 rounded-xl bg-primary text-primary-foreground font-semibold hover:brightness-110 transition-all glow-primary"
+            className="inline-flex items-center gap-2 h-12 px-7 rounded-xl bg-metal text-primary-foreground font-semibold hover:brightness-110 transition-all glow-brand"
           >
             <CandlestickChart className="h-[18px] w-[18px]" />
             Open the Terminal
@@ -283,9 +283,9 @@ function TerminalShowcase({ reducedMotion }: { reducedMotion: boolean }) {
         >
           {/* chrome */}
           <div className="flex items-center gap-2 px-4 h-10 border-b border-border/60 bg-surface-1/70">
-            <span className="h-2.5 w-2.5 rounded-full bg-down/70" />
-            <span className="h-2.5 w-2.5 rounded-full bg-chart-2/70" />
-            <span className="h-2.5 w-2.5 rounded-full bg-up/70" />
+            <span className="h-2.5 w-2.5 rounded-full bg-muted-foreground/40" />
+            <span className="h-2.5 w-2.5 rounded-full bg-muted-foreground/60" />
+            <span className="h-2.5 w-2.5 rounded-full bg-muted-foreground/90" />
             <span className="ml-3 font-mono-data text-[11px] text-muted-foreground">
               meridian://terminal/NVDA
             </span>
@@ -455,7 +455,7 @@ function ClosingCta() {
         </p>
         <Link
           to="/terminal"
-          className="mt-9 inline-flex items-center gap-2 h-12 px-8 rounded-xl bg-primary text-primary-foreground font-semibold text-[15px] hover:brightness-110 transition-all glow-primary"
+          className="mt-9 inline-flex items-center gap-2 h-12 px-8 rounded-xl bg-metal text-primary-foreground font-semibold text-[15px] hover:brightness-110 transition-all glow-brand"
         >
           Launch Meridian Terminal
           <ArrowRight className="h-4 w-4" />
