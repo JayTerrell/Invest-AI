@@ -6,7 +6,7 @@ import { createServer } from "./server";
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
   server: {
-    host: "::",
+    host: "0.0.0.0",
     port: 8080,
     fs: {
       allow: ["./client", "./shared"],
@@ -15,6 +15,10 @@ export default defineConfig(({ mode }) => ({
   },
   build: {
     outDir: "dist/spa",
+    // SINGLE_FILE=1 emits one JS bundle (no split chunks) for static single-file previews
+    ...(process.env.SINGLE_FILE === "1" && {
+      rollupOptions: { output: { inlineDynamicImports: true } },
+    }),
   },
   plugins: [react(), expressPlugin()],
   resolve: {

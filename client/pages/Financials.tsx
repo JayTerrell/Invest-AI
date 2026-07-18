@@ -1,113 +1,167 @@
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Panel, StatTile } from "@/components/meridian/Primitives";
+import { useMarket } from "@/context/MarketContext";
+import {
+  bySymbol,
+  fmtCompact,
+  getFinancials,
+  UNIVERSE,
+} from "@/lib/market";
+import { cn } from "@/lib/utils";
+import { useMemo } from "react";
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Legend,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 
-function Bars() {
-  const vals = [42, 55, 48, 60, 52, 66, 58, 70];
-  return (
-    <div className="h-48 w-full flex items-end gap-2">
-      {vals.map((v, i) => (
-        <div key={i} className="flex-1 bg-primary/20 rounded" style={{ height: `${v}%` }} />
-      ))}
-    </div>
-  );
-}
+const GRID = "hsl(224 40% 40% / 0.1)";
+const TEXT = "hsl(222 14% 58%)";
+const C1 = "hsl(var(--chart-1))";
+const C2 = "hsl(var(--chart-2))";
+const C3 = "hsl(var(--chart-3))";
 
-function Line() {
-  return (
-    <svg viewBox="0 0 600 200" className="w-full h-48">
-      <path d="M0 150 C 80 120, 160 110, 240 130 S 400 140, 600 110" fill="none" stroke="hsl(var(--primary))" strokeWidth="2" />
-      <path d="M0 160 C 80 140, 160 135, 240 145 S 400 150, 600 130" fill="none" stroke="#94a3b8" strokeWidth="2" opacity=".6" />
-    </svg>
-  );
-}
+const tooltipStyle = {
+  background: "hsl(227 34% 10%)",
+  border: "1px solid hsl(226 24% 20%)",
+  borderRadius: 10,
+  fontSize: 12,
+  fontFamily: "'JetBrains Mono', monospace",
+};
 
 export default function Financials() {
-  return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-semibold">Financial Statement Comparison</h1>
-      <Card>
-        <CardHeader className="pb-0">
-          <CardTitle className="text-lg">Comparison Controls</CardTitle>
-          <CardDescription>Select Companies for Comparison and set filters</CardDescription>
-        </CardHeader>
-        <CardContent className="grid md:grid-cols-3 gap-4">
-          <div className="md:col-span-2 flex flex-wrap gap-2">
-            {['AAPL','MSFT','GOOGL'].map(tag => (
-              <span key={tag} className="px-2 py-1 rounded-md bg-accent text-sm">{tag}</span>
-            ))}
-            <button className="px-3 py-2 border rounded-md">+ Add</button>
-          </div>
-          <div className="grid gap-2">
-            <label className="text-sm">Primary Metric<select className="mt-1 h-10 w-full rounded-md border px-2 text-sm"><option>Revenue</option><option>EPS</option></select></label>
-            <label className="text-sm">Financial Period<select className="mt-1 h-10 w-full rounded-md border px-2 text-sm"><option>Last 4 Quarters</option><option>Last 8 Quarters</option></select></label>
-          </div>
-        </CardContent>
-      </Card>
+  const { activeSymbol, setActiveSymbol } = useMarket();
+  const meta = bySymbol(activeSymbol);
+  const fin = useMemo(() => getFinancials(activeSymbol), [activeSymbol]);
+  const latest = fin[fin.length - 1];
+  const prior = fin[fin.length - 2];
+  const revGrowth = ((latest.revenue - prior.revenue) / prior.revenue) * 100;
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Quarterly Financial Data</CardTitle>
-          <CardDescription>Side-by-side of selected financial metrics over the last 8 quarters.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto">
-            <table className="min-w-[800px] w-full text-sm">
-              <thead>
-                <tr className="border-b text-muted-foreground">
-                  <th className="py-2 text-left">Company / Quarter</th>
-                  {['Q1 2023','Q2 2023','Q3 2023','Q4 2023','Q1 2024','Q2 2024','Q3 2024','Q4 2024'].map((q)=> (
-                    <th key={q} className="text-left">{q}</th>
+  return (
+    <div className="space-y-4">
+      {/* symbol selector */}
+      <div className="glass rounded-xl px-3 py-2.5 flex items-center gap-2 overflow-x-auto">
+        {UNIVERSE.map((u) => (
+          <button
+            key={u.symbol}
+            onClick={() => setActiveSymbol(u.symbol)}
+            className={cn(
+              "px-2.5 py-1 rounded-lg text-[12px] font-mono-data font-medium whitespace-nowrap transition-colors",
+              u.symbol === activeSymbol
+                ? "bg-primary/15 text-primary shadow-[inset_0_0_0_1px_hsl(var(--primary)/0.3)]"
+                : "text-muted-foreground hover:text-foreground hover:bg-accent/50",
+            )}
+          >
+            {u.symbol}
+          </button>
+        ))}
+      </div>
+
+      {/* headline metrics */}
+      <div className="glass rounded-xl px-5 py-4">
+        <div className="flex items-baseline gap-3 mb-4">
+          <h1 className="font-display text-xl font-bold">{meta.name}</h1>
+          <span className="text-[11px] font-mono-data text-muted-foreground">
+            {meta.symbol} · {meta.sector} · FY25 trailing twelve months
+          </span>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-x-8 gap-y-3">
+          <StatTile label="Revenue (TTM)" value={`$${fmtCompact(latest.revenue * 1e9)}`} sub={`${revGrowth >= 0 ? "+" : ""}${revGrowth.toFixed(1)}% YoY`} />
+          <StatTile label="Net Income" value={`$${fmtCompact(latest.netIncome * 1e9)}`} />
+          <StatTile label="Free Cash Flow" value={`$${fmtCompact(latest.fcf * 1e9)}`} />
+          <StatTile label="Gross Margin" value={`${latest.grossMargin.toFixed(1)}%`} />
+          <StatTile label="Operating Margin" value={`${latest.opMargin.toFixed(1)}%`} />
+          <StatTile label="EPS (TTM)" value={`$${meta.eps.toFixed(2)}`} sub={`P/E ${meta.pe.toFixed(1)}`} />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <Panel title="Revenue & Free Cash Flow" subtitle="USD billions · fiscal years">
+          <div className="h-64">
+            <ResponsiveContainer>
+              <BarChart data={fin} barGap={2}>
+                <CartesianGrid stroke={GRID} vertical={false} />
+                <XAxis dataKey="period" tick={{ fill: TEXT, fontSize: 11 }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fill: TEXT, fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={(v: number) => `$${v.toFixed(0)}B`} width={52} />
+                <Tooltip
+                  contentStyle={tooltipStyle}
+                  cursor={{ fill: "hsl(226 30% 20% / 0.25)" }}
+                  formatter={(v: number) => [`$${v.toFixed(1)}B`]}
+                />
+                <Legend wrapperStyle={{ fontSize: 11, color: TEXT }} />
+                <Bar name="Revenue" dataKey="revenue" fill={C1} radius={[4, 4, 0, 0]} maxBarSize={38} />
+                <Bar name="Free cash flow" dataKey="fcf" fill={C2} radius={[4, 4, 0, 0]} maxBarSize={38} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </Panel>
+
+        <Panel title="Margin Structure" subtitle="Percent of revenue · fiscal years">
+          <div className="h-64">
+            <ResponsiveContainer>
+              <LineChart data={fin}>
+                <CartesianGrid stroke={GRID} vertical={false} />
+                <XAxis dataKey="period" tick={{ fill: TEXT, fontSize: 11 }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fill: TEXT, fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={(v: number) => `${v.toFixed(0)}%`} width={44} />
+                <Tooltip
+                  contentStyle={tooltipStyle}
+                  formatter={(v: number) => [`${v.toFixed(1)}%`]}
+                />
+                <Legend wrapperStyle={{ fontSize: 11, color: TEXT }} />
+                <Line name="Gross margin" dataKey="grossMargin" stroke={C1} strokeWidth={2} dot={{ r: 3 }} />
+                <Line name="Operating margin" dataKey="opMargin" stroke={C2} strokeWidth={2} dot={{ r: 3 }} />
+                <Line name="Net margin" dataKey="netMargin" stroke={C3} strokeWidth={2} dot={{ r: 3 }} />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </Panel>
+      </div>
+
+      <Panel title="Income Statement" subtitle="USD billions unless noted" bodyClassName="px-0 pb-1">
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[640px] text-[13px]">
+            <thead>
+              <tr className="text-[10px] uppercase tracking-[0.12em] text-muted-foreground border-b border-border/60">
+                <th className="px-4 py-2.5 text-left font-medium">Line Item</th>
+                {fin.map((p) => (
+                  <th key={p.period} className="px-4 py-2.5 text-right font-medium font-mono-data">
+                    {p.period}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {(
+                [
+                  ["Revenue", (p) => `$${p.revenue.toFixed(1)}`],
+                  ["Gross profit", (p) => `$${p.grossProfit.toFixed(1)}`],
+                  ["Operating income", (p) => `$${p.opIncome.toFixed(1)}`],
+                  ["Net income", (p) => `$${p.netIncome.toFixed(1)}`],
+                  ["Free cash flow", (p) => `$${p.fcf.toFixed(1)}`],
+                  ["Gross margin", (p) => `${p.grossMargin.toFixed(1)}%`],
+                  ["Operating margin", (p) => `${p.opMargin.toFixed(1)}%`],
+                  ["Net margin", (p) => `${p.netMargin.toFixed(1)}%`],
+                ] as [string, (p: (typeof fin)[number]) => string][]
+              ).map(([label, get]) => (
+                <tr key={label} className="border-b border-border/40 last:border-0 hover:bg-accent/30">
+                  <td className="px-4 py-2 text-muted-foreground">{label}</td>
+                  {fin.map((p) => (
+                    <td key={p.period} className="px-4 py-2 text-right font-mono-data">
+                      {get(p)}
+                    </td>
                   ))}
                 </tr>
-              </thead>
-              <tbody>
-                {['AAPL','MSFT','GOOGL'].map((co)=> (
-                  <tr key={co} className="border-b last:border-0">
-                    <td className="py-2 font-medium">{co}</td>
-                    {Array.from({length:8}).map((_,i)=> (
-                      <td key={i}>${(50 + Math.round(Math.random()*60))}.00B</td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </CardContent>
-      </Card>
-
-      <div className="grid lg:grid-cols-3 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Quarterly Revenue Comparison</CardTitle>
-          </CardHeader>
-          <CardContent><Bars /></CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">EPS Trend Comparison</CardTitle>
-          </CardHeader>
-          <CardContent><Line /></CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Gross Profit Margin Trends</CardTitle>
-          </CardHeader>
-          <CardContent><Line /></CardContent>
-        </Card>
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle className="text-lg">AI Insights</CardTitle>
-          </CardHeader>
-          <CardContent className="text-sm text-muted-foreground">
-            Revenue growth for Apple Inc. has shown consistent upward momentum over the last 8 quarters, outpacing Alphabet Inc. in most periods. Gross Profit Margin for Microsoft remains strong relative to sector averages, driven by cloud transformation. Amazon shows an increase in operational costs as competitive pricing continues to pressure margins.
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Debt-to-Equity Ratio</CardTitle>
-          </CardHeader>
-          <CardContent><Bars /></CardContent>
-        </Card>
-      </div>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </Panel>
     </div>
   );
 }
