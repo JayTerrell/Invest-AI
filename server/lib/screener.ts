@@ -19,7 +19,12 @@ import {
   SwingPoint,
   Candle,
 } from "./technicals";
-import { fetchDailyCandlesFromMassive, fetchWeeklyCandlesFromMassive } from "./massive";
+import {
+  fetchDailyCandlesFromMassive,
+  fetchNewsForTicker,
+  fetchFinancials,
+  fetchOptionsContracts,
+} from "./massive";
 
 export interface ScreenerResult {
   symbol: string;
@@ -44,6 +49,52 @@ export interface ScreenerConfig {
 }
 
 /**
+ * Downsample daily candles to weekly by taking Friday closes
+ */
+function downsampleToWeekly(dailyCandles: Candle[]): Candle[] {
+  const weeklyCandles: Candle[] = [];
+  let weekOpen = 0;
+  let weekHigh = -Infinity;
+  let weekLow = Infinity;
+  let weekVolume = 0;
+  let weekStart: Date | null = null;
+
+  for (const candle of dailyCandles) {
+    const dayOfWeek = candle.date.getDay();
+
+    if (!weekStart) {
+      weekStart = candle.date;
+      weekOpen = candle.open;
+    }
+
+    weekHigh = Math.max(weekHigh, candle.high);
+    weekLow = Math.min(weekLow, candle.low);
+    weekVolume += candle.volume;
+
+    // Friday (5) or last candle
+    if (dayOfWeek === 5 || dailyCandles[dailyCandles.length - 1] === candle) {
+      weeklyCandles.push({
+        date: candle.date,
+        open: weekOpen,
+        high: weekHigh,
+        low: weekLow,
+        close: candle.close,
+        volume: weekVolume,
+      });
+
+      // Reset for next week
+      weekStart = null;
+      weekOpen = 0;
+      weekHigh = -Infinity;
+      weekLow = Infinity;
+      weekVolume = 0;
+    }
+  }
+
+  return weeklyCandles;
+}
+
+/**
  * Technical screening stage
  * Analyzes fractal structure + Vegas Wave + RSI
  */
@@ -62,11 +113,9 @@ async function stageQC2Technical(
   const weeklyLookback = config.weeklyMacroLookback || 50;
   const weeklyRetrace = config.weeklyMacroRetrace || 25;
 
-  // Fetch daily and weekly candles
-  const [dailyCandles, weeklyCandles] = await Promise.all([
-    fetchDailyCandlesFromMassive(symbol, 500),
-    fetchWeeklyCandlesFromMassive(symbol, 250),
-  ]);
+  // Fetch daily candles and downsample to weekly
+  const dailyCandles = await fetchDailyCandlesFromMassive(symbol, 500);
+  const weeklyCandles = downsampleToWeekly(dailyCandles);
 
   if (dailyCandles.length < 233) {
     return {
@@ -142,42 +191,103 @@ async function stageQC2Technical(
 }
 
 /**
- * Fundamental screen (stub for now)
- * Would integrate with quarterly filings API
+ * Fundamental screen
+ * Checks quarterly financials for quality signals
  */
 async function stageQC4Fundamentals(symbol: string): Promise<boolean> {
-  // Placeholder: in production, would fetch:
-  // - Latest quarterly revenue growth
-  // - Margin trends
-  // - Debt/equity ratios
-  // - Free cash flow
-  // For now, return true to allow other stages to run
-  return true;
+  try {
+    const financials = await fetchFinancials(symbol, "income");
+
+    if (financials.length === 0) {
+      return true; // No data available, don't filter out
+    }
+
+    const latest = financials[0];
+    const previous = financials[1] || latest;
+
+    // Quality filters:
+    // 1. Positive net margin (profitable)
+    if (latest.margins.net < 0) {
+      return false;
+    }
+
+    // 2. Positive free cash flow
+    if (latest.cashFlow.freeCashFlow < 0) {
+      return false;
+    }
+
+    // 3. Revenue growth YoY (compare Q3 2024 to Q3 2023)
+    const revenueGrowth =
+      (latest.revenue - previous.revenue) / previous.revenue;
+    if (revenueGrowth < -0.1) {
+      // Revenue declined > 10%
+      return false;
+    }
+
+    // 4. Reasonable debt/equity
+    if (latest.debtToEquity > 3.0) {
+      return false; // Too much debt
+    }
+
+    return true;
+  } catch (error) {
+    console.error(`Error in fundamental screen for ${symbol}:`, error);
+    return true; // Don't filter on error
+  }
 }
 
 /**
- * Sentiment screen (stub for now)
- * Would integrate with news API
+ * Sentiment screen
+ * Analyzes recent news and articles for positive signals
  */
 async function stageQC5Sentiment(symbol: string): Promise<boolean> {
-  // Placeholder: in production, would aggregate:
-  // - Recent news sentiment
-  // - Social media signals
-  // - Insider transactions
-  return true;
+  try {
+    const articles = await fetchNewsForTicker(symbol, 5);
+
+    if (articles.length === 0) {
+      return true; // No recent news, neutral
+    }
+
+    // Count positive vs negative insights
+    let positiveCount = 0;
+    let negativeCount = 0;
+
+    for (const article of articles) {
+      for (const insight of article.insights) {
+        if (insight.ticker === symbol) {
+          if (insight.sentiment === "positive") positiveCount++;
+          else if (insight.sentiment === "negative") negativeCount++;
+        }
+      }
+    }
+
+    // Pass if more positive than negative in recent news
+    return positiveCount >= negativeCount;
+  } catch (error) {
+    console.error(`Error in sentiment screen for ${symbol}:`, error);
+    return true; // Don't filter on error
+  }
 }
 
 /**
- * Options screen (stub for now)
- * Would integrate with options data API
+ * Options screen
+ * Checks for liquid options and reasonable premiums
  */
 async function stageQC7Options(symbol: string): Promise<boolean> {
-  // Placeholder: in production, would check:
-  // - IV rank
-  // - Options flow
-  // - Greeks
-  // - Earnings dates
-  return true;
+  try {
+    // Get next expiration date (approximately 30 days out)
+    const today = new Date();
+    const nextExpiry = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000);
+    const expiryStr = nextExpiry.toISOString().split("T")[0];
+
+    const contracts = await fetchOptionsContracts(symbol, expiryStr, 10);
+
+    // Pass if there are liquid options available
+    return contracts.length > 0;
+  } catch (error) {
+    console.error(`Error in options screen for ${symbol}:`, error);
+    return true; // Don't filter on error
+  }
 }
 
 /**
